@@ -111,6 +111,7 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
         close(cmdlist_file_conn)
       }
       return(command_to_run)
+    }
   }
 
   if (!verbose) {
