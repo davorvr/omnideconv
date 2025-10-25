@@ -63,20 +63,24 @@ check_container <- function(container = c("docker", "apptainer")) {
 #'
 #' @return the path to the apptainer container
 #'
-setup_apptainer_container <- function(container_path = NULL) {
+setup_apptainer_container <- function(container_path = NULL, dry_run = FALSE) {
   if (is.null(container_path)) {
     container_path <- file.path(path.expand("~"), ".local/share/omnideconv")
     dir.create(container_path, showWarnings = FALSE)
-    message(paste0("apptainer container written to `", container_path, "/cibersortx_fractions.sif`.
+    message(paste0("apptainer container will be written to `", container_path, "/cibersortx_fractions.sif`.
             Set the `container_path` directory to choose a different location"))
   }
 
   # We assume that, even in case of user provided file, the file name will
   # be 'fractions_latest.sif'
   container_file <- file.path(container_path, "fractions_latest.sif")
-
+  command <- paste0("apptainer pull --dir ", container_path, " docker://cibersortx/fractions")
+  if (dry_run) {
+    message(command)
+    return(command)
+  }
   if (!file.exists(container_file)) {
-    system(paste0("apptainer pull --dir ", container_path, " docker://cibersortx/fractions"))
+    system(command)
   }
 
   return(container_file)
