@@ -52,7 +52,7 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
                                    container_path = NULL,
                                    verbose = FALSE, input_dir = NULL,
                                    output_dir = NULL, display_heatmap = FALSE,
-                                   k_max = 999, ...) {
+                                   k_max = 999, dry_run = FALSE, ...) {
   if (is.null(single_cell_object)) {
     stop("Parameter 'single_cell_object' is missing or null, but it is required.")
   }
@@ -94,8 +94,9 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
     k_max = k_max, ...
   )
 
-  if (verbose) {
+  if (verbose || dry_run) {
     message(command_to_run)
+    if (dry_run) return(command_to_run)
   }
 
   if (!verbose) {
@@ -131,6 +132,15 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
 
   sig_matrix <- verbose_wrapper(verbose)(as.data.frame(readr::read_tsv(
     paste0(output_dir, "/", filename_sig_matrix)
+  )))
+  rownames(sig_matrix) <- sig_matrix$NAME
+
+  return(as.matrix.data.frame(sig_matrix[, -1]))
+}
+
+load_model_cibersortx <- function(filename) {
+  sig_matrix <- verbose_wrapper(verbose)(as.data.frame(readr::read_tsv(
+    filename
   )))
   rownames(sig_matrix) <- sig_matrix$NAME
 
@@ -185,7 +195,7 @@ deconvolute_cibersortx <- function(bulk_gene_expression, signature,
                                    verbose = FALSE,
                                    container = c("docker", "apptainer"),
                                    container_path = NULL,
-                                   input_dir = NULL, output_dir = NULL,
+                                   input_dir = NULL, output_dir = NULL, dry_run = FALSE,
                                    display_extra_info = FALSE, label = "none", ...) {
   if (is.null(bulk_gene_expression)) {
     stop("Parameter 'bulk_gene_expression' is missing or null, but it is required.")
@@ -272,8 +282,9 @@ deconvolute_cibersortx <- function(bulk_gene_expression, signature,
 
   cell_props_full_path <- paste0(output_dir, "/", filename_cell_props)
 
-  if (verbose) {
+  if (verbose || dry_run) {
     message(command_to_run)
+    if (dry_run) return(command_to_run)
   }
 
   if (!verbose) {
@@ -307,6 +318,26 @@ deconvolute_cibersortx <- function(bulk_gene_expression, signature,
     colnames(cell_props) <- colnames(signature)
   }
 
+
+  return(as.matrix.data.frame(cell_props))
+}
+
+load_cibersortx <- function(filename) {
+  cell_props_tmp <- verbose_wrapper(verbose)(as.data.frame(readr::read_tsv(
+    filename
+  )))
+  cell_props <- cell_props_tmp
+  rm(cell_props_tmp)
+  rownames(cell_props) <- cell_props$Mixture
+  cell_props <- cell_props[, -1]
+
+  extra_cols <- c("Correlation", "RMSE", "P-value")
+  if (display_extra_info) {
+    print(cell_props[, extra_cols])
+  } else {
+    cell_props <- cell_props[, !names(cell_props) %in% extra_cols]
+    colnames(cell_props) <- colnames(signature)
+  }
 
   return(as.matrix.data.frame(cell_props))
 }
