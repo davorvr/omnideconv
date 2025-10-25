@@ -83,7 +83,7 @@ setup_apptainer_container <- function(container_path = NULL, dry_run = FALSE) {
     system(command)
   }
 
-  return(container_file)
+  return(list(command, container_file))
 }
 
 
