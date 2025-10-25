@@ -52,7 +52,7 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
                                    container_path = NULL,
                                    verbose = FALSE, input_dir = NULL,
                                    output_dir = NULL, display_heatmap = FALSE,
-                                   k_max = 999, dry_run = FALSE, ...) {
+                                   k_max = 999, dry_run = FALSE, cmdlist_file = NULL, ...) {
   if (is.null(single_cell_object)) {
     stop("Parameter 'single_cell_object' is missing or null, but it is required.")
   }
@@ -69,9 +69,16 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
   check_credentials()
 
   temp_dir <- tempdir()
+  if (!is.null(cmdlist_file)) {
+    cmdlist_file_conn <- file(cmdlist_file)
+  }
 
   if (container == "apptainer") {
-    container_path <- setup_apptainer_container(container_path)
+    container_info <- setup_apptainer_container(container_path, dry_run = dry_run)
+    container_path <- container_info[[2]]
+    if (!is.null(cmdlist_file)) {
+      writeLines(container_info[[1]], cmdlist_file_conn)
+    }
   }
 
   if (is.null(input_dir)) {
@@ -96,7 +103,14 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
 
   if (verbose || dry_run) {
     message(command_to_run)
-    if (dry_run) return(command_to_run)
+    if (!is.null(cmdlist_file)) {
+      writeLines(command_to_run, cmdlist_file_conn)
+    }
+    if (dry_run) {
+      if (!is.null(cmdlist_file)) {
+        close(cmdlist_file_conn)
+      }
+      return(command_to_run)
   }
 
   if (!verbose) {
@@ -134,7 +148,9 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
     paste0(output_dir, "/", filename_sig_matrix)
   )))
   rownames(sig_matrix) <- sig_matrix$NAME
-
+  if (!is.null(cmdlist_file)) {
+    close(cmdlist_file_conn)
+  }
   return(as.matrix.data.frame(sig_matrix[, -1]))
 }
 
