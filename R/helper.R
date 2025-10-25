@@ -77,7 +77,7 @@ setup_apptainer_container <- function(container_path = NULL, dry_run = FALSE) {
   command <- paste0("apptainer pull --dir ", container_path, " docker://cibersortx/fractions")
   if (dry_run) {
     message(command)
-    return(command)
+    return(list(command, container_file))
   }
   if (!file.exists(container_file)) {
     system(command)
