@@ -375,6 +375,7 @@ transform_and_save_single_cell <- function(sc_matrix, cell_types, path, verbose 
   rownames(output) <- c("GeneSymbol", rownames(sc_matrix))
   output <- data.frame("GeneSymbol" = rownames(output), output)
   output_file <- paste0(path, "/sample_file_for_cibersort.txt")
+  message("Writing single cell matrix to TSV...")
   readr::write_tsv(output, output_file, col_names = FALSE)
   if (verbose) {
     message(paste(
