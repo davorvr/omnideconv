@@ -89,7 +89,8 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
   }
 
   if (class(single_cell_object)[1] != "character") {
-    transform_and_save_single_cell(single_cell_object, cell_type_annotations, input_dir, verbose)
+    #transform_and_save_single_cell(single_cell_object, cell_type_annotations, input_dir, verbose)
+    save_single_cell_alternate(single_cell_object, input_dir)
     single_cell_object_filename <- "sample_file_for_cibersort.txt"
   } else {
     single_cell_object_filename <- single_cell_object
@@ -252,7 +253,8 @@ deconvolute_cibersortx <- function(bulk_gene_expression, signature,
       stop("Parameter 'cell_type_annotations' is missing or null, but it is required.")
     }
     if (class(single_cell_object)[1] != "character") {
-      transform_and_save_single_cell(single_cell_object, cell_type_annotations, input_dir, verbose)
+      #transform_and_save_single_cell(single_cell_object, cell_type_annotations, input_dir, verbose)
+      save_single_cell_alternate(single_cell_object, input_dir)
       single_cell_object_filename <- "sample_file_for_cibersort.txt"
     } else {
       single_cell_object_filename <- single_cell_object
@@ -369,6 +371,13 @@ load_cibersortx <- function(filename) {
 #'
 #' @return The path to the single cell data file
 #'
+save_single_cell_alternate <- function(sc_matrix, path, verbose = T) {
+  sc_matrix <- as_tibble(sc_matrix, rownames = "GeneSymbol")
+  readr::write_tsv(sc_matrix,
+                   paste0(path, "/sample_file_for_cibersort.txt"),
+                   progress = verbose)
+}
+  
 transform_and_save_single_cell <- function(sc_matrix, cell_types, path, verbose = FALSE) {
   message("Transforming single-cell matrix...")
   colnames(sc_matrix) <- cell_types
