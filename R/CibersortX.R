@@ -370,16 +370,17 @@ load_cibersortx <- function(filename) {
 #' @return The path to the single cell data file
 #'
 transform_and_save_single_cell <- function(sc_matrix, cell_types, path, verbose = FALSE) {
+  message("Transforming single-cell matrix...")
   colnames(sc_matrix) <- cell_types
   output <- rbind(colnames(sc_matrix), sc_matrix)
   rownames(output) <- c("GeneSymbol", rownames(sc_matrix))
   output <- data.frame("GeneSymbol" = rownames(output), output)
   output_file <- paste0(path, "/sample_file_for_cibersort.txt")
-  message("Writing single cell matrix to TSV...")
+  message("Writing single-cell matrix to TSV...")
   readr::write_tsv(output, output_file, col_names = FALSE)
   if (verbose) {
     message(paste(
-      "Single cell matrix was saved successfully and can be found at: ",
+      "Single-cell matrix was saved successfully and can be found at: ",
       output_file
     ))
   }
