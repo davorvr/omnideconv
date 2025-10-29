@@ -70,14 +70,16 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
 
   temp_dir <- tempdir()
   if (!is.null(cmdlist_file)) {
-    cmdlist_file_conn <- file(cmdlist_file)
+  #  cmdlist_file_conn <- file(cmdlist_file)
+    write("#!/bin/bash", cmdlist_file)
   }
 
   if (container == "apptainer") {
     container_info <- setup_apptainer_container(container_path, dry_run = dry_run)
     container_path <- container_info[[2]]
     if (!is.null(cmdlist_file)) {
-      writeLines(container_info[[1]], cmdlist_file_conn)
+      #writeLines(container_info[[1]], cmdlist_file_conn)
+      write(container_info[[1]], cmdlist_file, append = TRUE)
     }
   }
 
@@ -105,7 +107,8 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
   if (verbose || dry_run) {
     message(command_to_run)
     if (!is.null(cmdlist_file)) {
-      writeLines(command_to_run, cmdlist_file_conn)
+      #writeLines(command_to_run, cmdlist_file_conn)
+      write(command_to_run, cmdlist_file, append = TRUE)
     }
     if (dry_run) {
       if (!is.null(cmdlist_file)) {
