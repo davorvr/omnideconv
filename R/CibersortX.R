@@ -111,9 +111,9 @@ build_model_cibersortx <- function(single_cell_object, cell_type_annotations,
       write(command_to_run, cmdlist_file, append = TRUE)
     }
     if (dry_run) {
-      if (!is.null(cmdlist_file)) {
-        close(cmdlist_file_conn)
-      }
+      #if (!is.null(cmdlist_file)) {
+      #  close(cmdlist_file_conn)
+      #}
       return(command_to_run)
     }
   }
